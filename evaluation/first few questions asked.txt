@@ -1,0 +1,94 @@
+06/06/2026, 2 files lab policy.txt and school policy.txt
+each answer was in top 1 or top1 or top2 combined.
+
+below are the questions and the retrieved answers:
+
+Question: Can I install software?
+
+Top Matches:
+
+1. Source: lab rules.txt
+🔒 Security & Systems No unauthorized downloads:
+--------------------------------------------------
+2. Source: lab rules.txt
+6. Do not download games, software, or files without permission from your instructor.
+--------------------------------------------------
+
+Question: what are the rules about food?
+
+Top Matches:
+
+1. Source: lab rules.txt
+3. No food or drinks: Keep all snacks, water, and sodas away from workstations to protect equipment from spills.
+--------------------------------------------------
+2. Source: school policy.txt
+vegetarian menu. Availability of this service is dependent upon the number of students who opt for the program
+--------------------------------------------------
+3. Source: school policy.txt
+policies that are introduced by the Government.
+--------------------------------------------------
+4. Source: school policy.txt
+Supplementary Fees (Refundable): Only the cost of food shall be refunded on a pro-rata basis, proportionate to the
+--------------------------------------------------
+5. Source: school policy.txt
+number of days actually spent on the meal plan
+--------------------------------------------------
+
+Question: what should i do if equipment is damaged?
+
+Top Matches:
+
+1. Source: lab rules.txt
+5. Report damage: Notify the teacher immediately if you notice broken equipment or see sparking wires.
+--------------------------------------------------
+2. Source: lab rules.txt
+🖥️ Equipment CareHandle with care:
+--------------------------------------------------
+3. Source: lab rules.txt
+4. Leave cables alone: Do not touch, unplug, or tamper with any wires, routers, or power cables.
+
+Question: What permission is required before entering?
+
+Top Matches:
+
+1. Source: lab rules.txt
+11. Ask to enter: Wait for the teacher's permission before entering the lab or turning on any computers.
+
+
+Question: what is the policy about fees refund?
+
+Top Matches:
+
+1. Source: school policy.txt
+Supplementary Fees (Refundable): Only the cost of food shall be refunded on a pro-rata basis, proportionate to the
+--------------------------------------------------
+2. Source: school policy.txt
+fees and security deposits will be processed as per the school’s policies stated below, and will only then be refunded
+--------------------------------------------------
+3. Source: school policy.txt
+prior to receiving a refund of the security deposit
+--------------------------------------------------
+4. Source: school policy.txt
+correspondingly. No portion of the fee paid for the next academic year will be refundable or refunded.
+--------------------------------------------------
+5. Source: school policy.txt
+Outbound & Experiential programs will not be refunded, as they are pre-determined annual fixed costs that have been
+
+Question: can i pay fees monthly via UPI?
+
+Top Matches:
+
+1. Source: school policy.txt
+e. Monthly: For those opting to pay the fees on a monthly basis, the annual fees can be paid in 10 equal monthly
+--------------------------------------------------
+2. Source: school policy.txt
+a. For the convenience of parents / guardians, the fees can be paid either in Monthly, Term or Yearly payment options
+--------------------------------------------------
+3. Source: school policy.txt
+FEE PAYMENT INFORMATION
+--------------------------------------------------
+4. Source: school policy.txt
+OTHER / SUPPLEMENTARY FEES
+--------------------------------------------------
+5. Source: school policy.txt
+a. All fees are payable and accepted in Indian Rupees (INR) only
