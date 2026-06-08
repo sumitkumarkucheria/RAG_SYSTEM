@@ -4,6 +4,7 @@ import faiss
 import numpy as np
 import pickle
 
+THRESHOLD = 1.20
 app = FastAPI()
 
 print("Loading embedding model...")
@@ -34,15 +35,30 @@ def search(query: str, top_k: int = 5):
         top_k
     )
 
+    best_distance = float(distances[0][0])
+
+    # Knowledge boundary
+    if best_distance > THRESHOLD:
+
+        return {
+            "found": False,
+            "best_distance": best_distance,
+            "message": "Information not found in knowledge base."
+        }
+
     results = []
 
-    for idx in indices[0]:
+    for rank, idx in enumerate(indices[0]):
+
         results.append({
             "source": chunks[idx]["source"],
-            "text": chunks[idx]["text"]
+            "text": chunks[idx]["text"],
+            "distance": float(distances[0][rank])
         })
 
     return {
+        "found": True,
+        "best_distance": best_distance,
         "query": query,
         "results": results
     }

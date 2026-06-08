@@ -11,7 +11,15 @@ retrieval = requests.get(
     }
 )
 
-results = retrieval.json()["results"]
+data = retrieval.json()
+
+if not data["found"]:
+    print("\nInformation not found in knowledge base.")
+    exit()
+
+
+
+results = data["results"]
 
 context = "\n\n".join(
     item["text"] for item in results

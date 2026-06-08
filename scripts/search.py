@@ -24,6 +24,13 @@ distances, indices = index.search(
     5
 )
 
+for rank, idx in enumerate(indices[0]):
+    print(
+        rank + 1,
+        distances[0][rank],
+        chunks[idx]["source"]
+    )
+
 print("\nTop Matches:\n")
 
 for rank, idx in enumerate(indices[0], start=1):
