@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>School AI Assistant</title>
+</head>
+
+<body>
+
+<h1>School AI Assistant</h1>
+
+<input
+    id="question"
+    type="text"
+    style="width:500px;"
+    placeholder="Ask a question..."
+>
+
+<button onclick="askQuestion()">
+    Ask
+</button>
+
+<pre id="answer"></pre>
+
+<script>
+
+async function askQuestion() {
+
+    let question =
+        document.getElementById(
+            "question"
+        ).value;
+
+    document.getElementById(
+        "answer"
+    ).textContent = "Thinking...";
+
+    let response =
+        await fetch(
+            "/ask",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                    "application/json"
+                },
+                body: JSON.stringify({
+                    question: question
+                })
+            }
+        );
+
+    let data =
+        await response.json();
+
+    document.getElementById(
+        "answer"
+    ).textContent =
+        data.answer +
+        "\n\nSources:\n" +
+        data.sources.join("\n") +
+        "\n\nDistance: " +
+        data.best_distance;
+}
+
+</script>
+
+</body>
+
+</html>
