@@ -16,13 +16,44 @@
     placeholder="Ask a question..."
 >
 
-<button onclick="askQuestion()">
+<button
+    id="askButton"
+    onclick="askQuestion()">
     Ask
 </button>
+
+<button
+    id="stopButton"
+    onclick="stopGeneration()"
+    disabled>
+    Stop
+</button>
+
+<br><br>
 
 <pre id="answer"></pre>
 
 <script>
+
+let currentReader = null;
+
+function stopGeneration() {
+
+    if (currentReader) {
+
+        currentReader.cancel();
+
+        currentReader = null;
+    }
+
+    document.getElementById(
+        "askButton"
+    ).disabled = false;
+
+    document.getElementById(
+        "stopButton"
+    ).disabled = true;
+}
 
 async function askQuestion() {
 
@@ -31,36 +62,104 @@ async function askQuestion() {
             "question"
         ).value;
 
-    document.getElementById(
-        "answer"
-    ).textContent = "Thinking...";
-
-    let response =
-        await fetch(
-            "/ask",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type":
-                    "application/json"
-                },
-                body: JSON.stringify({
-                    question: question
-                })
-            }
+    let answerBox =
+        document.getElementById(
+            "answer"
         );
 
-    let data =
-        await response.json();
+    if (!question.trim()) {
+        return;
+    }
 
-    document.getElementById(
-        "answer"
-    ).textContent =
-        data.answer +
-        "\n\nSources:\n" +
-        data.sources.join("\n") +
-        "\n\nDistance: " +
-        data.best_distance;
+    const askButton =
+        document.getElementById(
+            "askButton"
+        );
+
+    const stopButton =
+        document.getElementById(
+            "stopButton"
+        );
+
+    askButton.disabled = true;
+    stopButton.disabled = false;
+
+    answerBox.textContent =
+        "Retrieving knowledge...";
+
+    try {
+
+        const response =
+            await fetch(
+                "/stream_ask",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                        "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        question: question
+                    })
+                }
+            );
+
+        answerBox.textContent =
+            "Generating answer...";
+
+        currentReader =
+            response.body.getReader();
+
+        const reader =
+            currentReader;
+
+        const decoder =
+            new TextDecoder();
+
+        let firstChunk = true;
+
+        while (true) {
+
+            const {
+                value,
+                done
+            } = await reader.read();
+
+            if (done) {
+                break;
+            }
+
+            if (firstChunk) {
+
+                answerBox.textContent = "";
+
+                firstChunk = false;
+            }
+
+            answerBox.textContent +=
+                decoder.decode(
+                    value,
+                    {
+                        stream: true
+                    }
+                );
+        }
+
+    } catch (error) {
+
+        answerBox.textContent =
+            "Error: " + error;
+
+    } finally {
+
+        askButton.disabled = false;
+
+        stopButton.disabled = true;
+
+        currentReader = null;
+    }
 }
 
 </script>

@@ -6,3 +6,7 @@ __pychache__/
 .env
 *.db
 documents/
+scripts_backup/
+vector_db_backup/
+evaluation/
+embeddings/

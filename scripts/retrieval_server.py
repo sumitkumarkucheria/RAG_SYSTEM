@@ -7,7 +7,8 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 import requests
 from pydantic import BaseModel
-
+from fastapi.responses import StreamingResponse
+import json
 THRESHOLD = 1.20
 app = FastAPI()
 WORKERS = [
@@ -195,17 +196,29 @@ Question:
             best_distance
         }
 
-    response = requests.post(
-        f"http://{worker}:11434/api/generate",
+    try:
 
-        json={
-            "model": "qwen2.5:1.5b",
-            "prompt": prompt,
-            "stream": False
-        },
+        response = requests.post(
+            f"http://{worker}:11434/api/generate",
+            json={
+                "model": "qwen2.5:1.5b",
+                "prompt": prompt,
+                "stream": False
+            },
+            timeout=120
+        )
 
-        timeout=120
-    )
+    except Exception:
+
+        return {
+            "answer":
+            "Worker failed during generation.",
+
+            "sources": sources,
+
+            "best_distance":
+            best_distance
+        }
 
     answer = response.json()["response"]
 
@@ -215,3 +228,105 @@ Question:
         "best_distance": best_distance,
         "worker": worker
     }
+
+
+@app.post("/stream_ask")
+def stream_ask(data: QuestionRequest):
+
+    query = data.question
+
+    query_embedding = model.encode([query])
+
+    distances, indices = index.search(
+        np.array(query_embedding, dtype=np.float32),
+        5
+    )
+
+    best_distance = float(distances[0][0])
+
+    if best_distance > THRESHOLD:
+
+        def not_found():
+
+            yield "Information not found in knowledge base."
+
+        return StreamingResponse(
+            not_found(),
+            media_type="text/plain"
+        )
+
+    context = ""
+
+    for idx in indices[0]:
+
+        context += (
+            chunks[idx]["text"]
+            + "\n\n"
+        )
+
+    prompt = f"""
+You are a CBSE Class 10 Science teacher. answer like explaining to students
+
+answer ONLY from the provided context.
+
+Do not use outside knowledge.
+
+If answer is not directly present,
+reply exactly:
+
+Information not found in knowledge base.
+
+Context:
+
+{context}
+
+Question:
+
+{query}
+"""
+
+    worker = get_next_worker()
+
+    if worker is None:
+
+        def no_worker():
+
+            yield "No workers available."
+
+        return StreamingResponse(
+            no_worker(),
+            media_type="text/plain"
+        )
+
+    def generate():
+
+        response = requests.post(
+            f"http://{worker}:11434/api/generate",
+            json={
+                "model": "qwen2.5:1.5b",
+                "prompt": prompt,
+                "stream": True
+            },
+            stream=True,
+            timeout=120
+        )
+
+        for line in response.iter_lines():
+
+            if not line:
+                continue
+
+            data = json.loads(line)
+
+            token = data.get(
+                "response",
+                ""
+            )
+
+            yield token
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/plain"
+    )
+
