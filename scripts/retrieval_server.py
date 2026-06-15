@@ -18,7 +18,13 @@ WORKERS = [
     "192.168.1.225"
 ]
 
-worker_index = 0
+
+WORKER_STATUS = {
+    "192.168.1.164": 0,
+    "192.168.1.171": 0,
+    "192.168.1.180": 0,
+    "192.168.1.225": 0
+}
 
 class QuestionRequest(BaseModel):
     question: str
@@ -32,7 +38,7 @@ def home():
     ) as f:
 
         return f.read()
-
+'''
 def get_next_worker():
 
     global worker_index
@@ -62,6 +68,53 @@ def get_next_worker():
             print(f"Worker unavailable: {worker}")
 
     return None
+'''
+
+def get_least_busy_worker():
+
+    available_workers = []
+
+    for worker in WORKERS:
+
+        try:
+
+            response = requests.get(
+                f"http://{worker}:11434",
+                timeout=2
+            )
+
+            if response.status_code == 200:
+
+                available_workers.append(
+                    (
+                        WORKER_STATUS[worker],
+                        worker
+                    )
+                )
+
+        except:
+
+            print(
+                f"Worker unavailable: {worker}"
+            )
+
+    if not available_workers:
+        return None
+
+    available_workers.sort()
+
+    selected_worker = (
+        available_workers[0][1]
+    )
+
+    print(
+        f"Selected Worker: "
+        f"{selected_worker} "
+        f"(Load="
+        f"{WORKER_STATUS[selected_worker]})"
+    )
+
+    return selected_worker
 
 
 
@@ -182,7 +235,10 @@ Question:
 {query}
 """
 
-    worker = get_next_worker()
+    worker = get_least_busy_worker()
+    WORKER_STATUS[worker] += 1
+
+    print( f"{worker} Load=" f"{WORKER_STATUS[worker]}")
 
     if worker is None:
 
@@ -195,30 +251,23 @@ Question:
             "best_distance":
             best_distance
         }
-
     try:
-
-        response = requests.post(
-            f"http://{worker}:11434/api/generate",
-            json={
-                "model": "qwen2.5:1.5b",
-                "prompt": prompt,
-                "stream": False
-            },
-            timeout=120
-        )
-
+        response = requests.post(f"http://{worker}:11434/api/generate",
+        json={
+            "model": "qwen2.5:1.5b",
+            "prompt": prompt,
+            "stream": False
+        },
+        timeout=120 )
     except Exception:
+        return {"answer": "Worker failed during generation.",
+                    "sources": sources,
+                    "best_distance":best_distance}
+    finally:
+        WORKER_STATUS[worker] -= 1
+        print( f"{worker} Load=" f"{WORKER_STATUS[worker]}")
 
-        return {
-            "answer":
-            "Worker failed during generation.",
-
-            "sources": sources,
-
-            "best_distance":
-            best_distance
-        }
+ 
 
     answer = response.json()["response"]
 
@@ -285,7 +334,10 @@ Question:
 {query}
 """
 
-    worker = get_next_worker()
+    worker = get_least_busy_worker()
+    WORKER_STATUS[worker] += 1
+    print( f"{worker} Load=" f"{WORKER_STATUS[worker]}")
+    
 
     if worker is None:
 
@@ -298,32 +350,34 @@ Question:
             media_type="text/plain"
         )
 
+
     def generate():
-
-        response = requests.post(
-            f"http://{worker}:11434/api/generate",
-            json={
-                "model": "qwen2.5:1.5b",
-                "prompt": prompt,
-                "stream": True
-            },
-            stream=True,
-            timeout=120
-        )
-
-        for line in response.iter_lines():
-
-            if not line:
-                continue
-
-            data = json.loads(line)
-
-            token = data.get(
-                "response",
-                ""
+        try:
+            response = requests.post(
+                f"http://{worker}:11434/api/generate",
+                json={
+                    "model": "qwen2.5:1.5b",
+                    "prompt": prompt,
+                    "stream": True
+                },
+                stream=True,
+                timeout=120
             )
 
-            yield token
+            for line in response.iter_lines():
+                if not line:
+                    continue
+                data = json.loads(line)
+                token = data.get(
+                    "response",
+                    ""
+                )
+                yield token
+        finally:
+            WORKER_STATUS[worker] -= 1
+            print(f"{worker} Load="f"{WORKER_STATUS[worker]}")
+
+    
 
     return StreamingResponse(
         generate(),
