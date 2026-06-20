@@ -47,7 +47,7 @@ def create_chunks(text, chunk_size=500, overlap=100):
 
 
 print("Loading embedding model...")
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer("BAAI/bge-small-en-v1.5")
 
 chunks = []
 

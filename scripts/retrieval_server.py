@@ -13,7 +13,7 @@ THRESHOLD = 1.20
 app = FastAPI()
 WORKERS = [
     "192.168.1.164",
-    "192.168.1.171",
+    "192.168.1.104",
     "192.168.1.180",
     "192.168.1.225"
 ]
@@ -21,7 +21,7 @@ WORKERS = [
 
 WORKER_STATUS = {
     "192.168.1.164": 0,
-    "192.168.1.171": 0,
+    "192.168.1.104": 0,
     "192.168.1.180": 0,
     "192.168.1.225": 0
 }
@@ -119,7 +119,7 @@ def get_least_busy_worker():
 
 
 print("Loading embedding model...")
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer("BAAI/bge-small-en-v1.5")
 
 print("Loading FAISS index...")
 index = faiss.read_index(
@@ -358,7 +358,8 @@ Question:
                 json={
                     "model": "qwen2.5:1.5b",
                     "prompt": prompt,
-                    "stream": True
+                    "stream": True,
+                    "options":{"temperature":0.1}
                 },
                 stream=True,
                 timeout=120
